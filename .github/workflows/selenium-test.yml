@@ -29,4 +29,9 @@ jobs:
       - name: Verify POM File Exists
         run: |
           if [ ! -f pom.xml ]; then
-            echo "Error: pom.xml
+            echo "Error: pom.xml not found!"
+            exit 1
+          fi
+
+      - name: Run Maven Tests
+        run: mvn clean test
