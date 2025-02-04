@@ -9,6 +9,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write  # Allows GitHub Actions to commit & push changes
+
 jobs:
   selenium-tests:
     runs-on: ubuntu-latest
@@ -17,8 +20,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Verify Project Structure
-        run: ls -R   # Debugging step to check where pom.xml is located
+      - name: Debug: List Files in the Runner
+        run: ls -R  # Check project structure
 
       - name: Set up JDK 11
         uses: actions/setup-java@v3
@@ -32,23 +35,33 @@ jobs:
           sudo apt-get install -y google-chrome-stable
           sudo apt-get install -y chromium-chromedriver
 
-      - name: Navigate to Project Directory
-        run: cd $GITHUB_WORKSPACE  # Ensure we are in the project root
+      - name: Run Maven Tests
+        run: mvn clean test
 
-      - name: Run Maven Tests with Debug Logging
-        run: mvn clean test -X
+      # Step 1: Force Git to detect changes
+      - name: Force Git to Detect Changes
+        run: |
+          git update-index --refresh
+          git status
 
-      # Step to configure Git for pushing changes
+      # Step 2: Debug if Excel file was updated
+      - name: Debug: Check If Excel File Was Updated
+        run: |
+          ls -lah path/to/excel-file.xlsx
+          md5sum path/to/excel-file.xlsx || echo "File does not exist"
+
+      # Step 3: Set up Git user details
       - name: Set up Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-      # Step to commit and push the changes to the repo
+      # Step 4: Commit & Push changes
       - name: Commit and Push Excel File Changes
         run: |
-          git add .  # Add the modified files (Excel in this case)
-          git commit -m "Update Excel file after test run"
-          git push origin main  # Push the changes to the 'main' branch
+          git add path/to/excel-file.xlsx
+          git status  # Verify if the file is staged
+          git commit -m "Update Excel file after test run" || echo "No changes to commit"
+          git push origin main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automatically available secret to authenticate and push
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
