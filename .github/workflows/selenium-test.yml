@@ -14,24 +14,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Verify Project Structure
-      run: ls -R   # Debugging step to check where pom.xml is located
+      - name: Debug: List Files in the Runner
+        run: ls -R  # Check the project structure in GitHub Actions
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '11'
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
-    - name: Set up Chrome & ChromeDriver
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
-        sudo apt-get install -y chromium-chromedriver
-    - name: Navigate to Project Directory
-      run: cd $GITHUB_WORKSPACE  # Ensure we are in the project root
-    - name: Run Maven Tests with Debug Logging
-      run: mvn clean test -X
+      - name: Verify POM File Exists
+        run: |
+          if [ ! -f pom.xml ]; then
+            echo "Error: pom.xml not found!"
+            exit 1
+          fi
+
+      - name: Run Maven Tests
+        run: mvn clean test
+
+      # Step to configure Git for pushing changes
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      # Step to commit and push the changes to the repo
+      - name: Commit and Push Excel File Changes
+        run: |
+          git add .  # Add the modified files (Excel in this case)
+          git commit -m "Update Excel file after test run"
+          git push origin main  # Push the changes to the 'main' branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automatically available secret to authenticate and push
