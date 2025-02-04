@@ -32,8 +32,8 @@ jobs:
         sudo apt-get install -y google-chrome-stable
         sudo apt-get install -y chromium-chromedriver
 
-    - name: Navigate to the Correct Directory
-      run: cd SampleProject  # Change this if pom.xml is inside a different folder
+    - name: Navigate to Project Directory
+      run: cd $GITHUB_WORKSPACE  # Ensure we are in the project root
 
     - name: Run Maven Tests
       run: mvn clean test
