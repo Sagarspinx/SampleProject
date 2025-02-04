@@ -35,6 +35,5 @@ jobs:
     - name: Navigate to Project Directory
       run: cd $GITHUB_WORKSPACE  # Ensure we are in the project root
 
-    - name: Run Maven Tests with Debug Logging
-      run: mvn clean test -X
-
+    - name: Run Maven Tests
+      run: mvn -f pom.xml clean test
